@@ -69,6 +69,13 @@ public class TaskController {
     public ResponseEntity<Void> deletTask(@PathVariable Long id){
         tskService.deletTask(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/create-with-log")
+    public TaskResponse createTaskWithLog(@RequestBody TaskRequest request,
+                                          @RequestParam Long userId){
+
+        return tskService.createTaskWithLog(request,userId);
 
     }
 
