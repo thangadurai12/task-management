@@ -2,12 +2,15 @@ package com.taskmanagement.taskService;
 
 import com.taskmanagement.dto.TaskRequest;
 import com.taskmanagement.dto.TaskResponse;
+import com.taskmanagement.entity.ActivityLog;
 import com.taskmanagement.entity.TaskEntity;
 import com.taskmanagement.entity.UserEntity;
 import com.taskmanagement.enums.TaskStatus;
 import com.taskmanagement.exception.TaskNotFoundException;
+import com.taskmanagement.taskRepo.ActivityLogRepository;
 import com.taskmanagement.taskRepo.TaskRepository;
 import com.taskmanagement.taskRepo.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,10 +21,13 @@ public class TskService {
 
 TaskRepository taskRepository;
 UserRepo userRepo;
+ActivityLogRepository activityLogRepository;
 public TskService(TaskRepository taskRepository,
-                  UserRepo userRepo){
+                  UserRepo userRepo,
+                  ActivityLogRepository activityLogRepository){
     this.taskRepository = taskRepository;
     this.userRepo =  userRepo;
+    this.activityLogRepository = activityLogRepository;
 }
 
     public TaskResponse create(TaskRequest taskRequest, Long userId) {
@@ -124,5 +130,24 @@ public TskService(TaskRepository taskRepository,
             ));
 
     taskRepository.delete(task);
+    }
+
+    @Transactional
+    public TaskResponse createTaskWithLog(TaskRequest request, Long userId){
+
+    TaskResponse savedTask = create(request, userId);
+
+        ActivityLog log = new ActivityLog();
+
+        log.setMessage("Task Created: "+ savedTask.getTitle());
+        log.setCreatedAt(new Date());
+
+        activityLogRepository.save(log);
+
+//        throw new RuntimeException("Testing rollback");
+
+        return savedTask;
+
+
     }
 }
