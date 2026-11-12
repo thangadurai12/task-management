@@ -11,10 +11,12 @@ import com.taskmanagement.taskRepo.ActivityLogRepository;
 import com.taskmanagement.taskRepo.TaskRepository;
 import com.taskmanagement.taskRepo.UserRepo;
 import jakarta.transaction.Transactional;
+import jdk.dynalink.linker.LinkerServices;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TskService {
@@ -145,9 +147,58 @@ public TskService(TaskRepository taskRepository,
         activityLogRepository.save(log);
 
 //        throw new RuntimeException("Testing rollback");
-
         return savedTask;
 
-
     }
+    public List<TaskResponse> searchTasks(String keyword){
+
+    List<TaskEntity> tasks = taskRepository.searchByTitle(keyword);
+
+    return tasks.stream()
+            .map(task -> new TaskResponse(
+                    task.getCreatedDate(),
+                    task.getDescription(),
+                    task.getDueDate(),
+                    task.getStatus(),
+                    task.getTitle(),
+                    task.getId()
+            )).toList();
+    }
+
+    public List<TaskResponse> searchTasks(
+            Long userId, TaskStatus status, String keyword){
+
+    List<TaskEntity> tasks = taskRepository.searchTasks(userId,status,keyword);
+
+    return tasks.stream()
+            .map(task-> new TaskResponse(
+                    task.getCreatedDate(),
+                    task.getDescription(),
+                    task.getDueDate(),
+                    task.getStatus(),
+                    task.getTitle(),
+                    task.getId()
+            )).toList();
+    }
+
+    public List<TaskResponse> searchTasksNative(
+            Long userId, TaskStatus status, String keyword) {
+
+        List<TaskEntity> tasks =
+                taskRepository.searchTasksNative(
+                        userId, status.name(), keyword);
+
+        return tasks.stream()
+                .map(task -> new TaskResponse(
+                        task.getCreatedDate(),
+                        task.getDescription(),
+                        task.getDueDate(),
+                        task.getStatus(),
+                        task.getTitle(),
+                        task.getId()
+                ))
+                .toList();
+    }
+
+
 }

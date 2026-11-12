@@ -12,6 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/tasks")
@@ -74,9 +76,32 @@ public class TaskController {
     @PostMapping("/create-with-log")
     public TaskResponse createTaskWithLog(@RequestBody TaskRequest request,
                                           @RequestParam Long userId){
-
         return tskService.createTaskWithLog(request,userId);
 
+    }
+
+    @GetMapping("/search")
+    public List<TaskResponse> searchTask(
+            @RequestParam String keyword){
+        return tskService.searchTasks(keyword);
+    }
+
+    @GetMapping("/search/advanced")
+    public List<TaskResponse> searchTask(
+            @RequestParam Long userId,
+            @RequestParam TaskStatus status,
+            @RequestParam String keyword
+    ){
+        return tskService.searchTasks(userId,status,keyword);
+    }
+
+    @GetMapping("/search/native")
+    public List<TaskResponse> searchTasksNative(
+            @RequestParam Long userId,
+            @RequestParam TaskStatus status,
+            @RequestParam String keyword) {
+
+        return tskService.searchTasksNative(userId, status, keyword);
     }
 
 }
